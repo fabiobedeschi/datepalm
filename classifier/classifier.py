@@ -1,7 +1,5 @@
 import os
 import datetime
-
-
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
 from keras import Sequential
 from keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropout
@@ -78,13 +76,12 @@ model.add(Dropout(0.5))
 model.add(Dense(1))
 model.add(Activation('sigmoid'))
 
-
 model.compile(loss='binary_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
-#needs pydot, graphviz
-plot_model(model, to_file='cnn_model.png', show_shapes=True, show_layer_names=True)
+# needs pydot, graphviz
+# plot_model(model, to_file='cnn_model.png', show_shapes=True, show_layer_names=True)
 
 start = datetime.datetime.now()
 model.fit_generator(
@@ -92,6 +89,7 @@ model.fit_generator(
     epochs=EPOCHS,
     validation_data=valid_generator
 )
+
 end = datetime.datetime.now()
 print('\nTime elapsed:', end-start)
 
@@ -99,5 +97,5 @@ test_loss = model.evaluate_generator(
     generator=test_generator
 )
 
-print(model.metrics_names)
-print(test_loss)
+print(f"{model.metrics_names[0]}: {test_loss[0]}")
+print(f"{model.metrics_names[1]}: {test_loss[1]}")
