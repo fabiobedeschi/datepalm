@@ -1,9 +1,12 @@
 import os
 import datetime
+
+
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
 from keras import Sequential
 from keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropout
 from keras.preprocessing.image import ImageDataGenerator
+from keras.utils.vis_utils import plot_model
 
 # Parameters
 IMG_SIZE = 224
@@ -11,6 +14,7 @@ CHANNELS = 3
 INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, CHANNELS)
 DIR_TRAIN = '../dataset/train'
 DIR_VALID = '../dataset/validation'
+DIR_TEST = '../dataset/test'
 EPOCHS = 10
 BATCH_SIZE = 16
 
@@ -26,8 +30,19 @@ valid_datagen = ImageDataGenerator(
     rescale=1./255
 )
 
+test_datagen = ImageDataGenerator(
+    rescale=1./255
+)
+
 train_generator = train_datagen.flow_from_directory(
     directory=DIR_TRAIN,
+    target_size=(IMG_SIZE, IMG_SIZE),
+    class_mode='binary',
+    batch_size=BATCH_SIZE
+)
+
+test_generator = test_datagen.flow_from_directory(
+    directory=DIR_TEST,
     target_size=(IMG_SIZE, IMG_SIZE),
     class_mode='binary',
     batch_size=BATCH_SIZE
@@ -39,6 +54,8 @@ valid_generator = valid_datagen.flow_from_directory(
     class_mode='binary',
     batch_size=BATCH_SIZE
 )
+
+print(train_generator.class_indices)
 
 # Model structure
 model = Sequential()
@@ -66,6 +83,9 @@ model.compile(loss='binary_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
+#needs pydot, graphviz
+plot_model(model, to_file='cnn_model.png', show_shapes=True, show_layer_names=True)
+
 start = datetime.datetime.now()
 model.fit_generator(
     generator=train_generator,
@@ -74,3 +94,10 @@ model.fit_generator(
 )
 end = datetime.datetime.now()
 print('\nTime elapsed:', end-start)
+
+test_loss = model.evaluate_generator(
+    generator=test_generator
+)
+
+print(model.metrics_names)
+print(test_loss)

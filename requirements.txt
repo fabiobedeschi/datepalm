@@ -1,2 +1,3 @@
 plaidml-keras
 plaidbench
+pillow
