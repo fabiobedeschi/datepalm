@@ -2,4 +2,4 @@ plaidml-keras
 plaidbench
 pillow
 pydot
-graphviz
+matplotlib

@@ -1,101 +1,171 @@
+import math
 import os
 import datetime
+import matplotlib.pyplot as plt
+
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
 from keras import Sequential
-from keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropout
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
+from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import EarlyStopping, LearningRateScheduler
 from keras.utils.vis_utils import plot_model
 
 # Parameters
 IMG_SIZE = 224
 CHANNELS = 3
 INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, CHANNELS)
-DIR_TRAIN = '../dataset/train'
-DIR_VALID = '../dataset/validation'
-DIR_TEST = '../dataset/test'
-EPOCHS = 10
-BATCH_SIZE = 16
+DATA_DIR = '../dataset'
+TRAIN_DIR = f'{DATA_DIR}/train'
+VALID_DIR = f'{DATA_DIR}/validation'
+TEST_DIR = f'{DATA_DIR}/test'
+EPOCHS = 100
+BATCH_SIZE = 32
+LEARNING_RATE = 0.001
+STEPS_MULTIPLIER = 1
 
-# Data pre-processing
-train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    horizontal_flip=True,
-    vertical_flip=True,
-    rotation_range=90
-)
 
-valid_datagen = ImageDataGenerator(
-    rescale=1./255
-)
+def load_dataset(augment: bool = False):
+    # Train data
+    if augment:
+        train_datagen = ImageDataGenerator(
+            rescale=1. / 255,
+            horizontal_flip=True,
+            vertical_flip=True,
+            rotation_range=90
+        )
+    else:
+        train_datagen = ImageDataGenerator(
+            rescale=1. / 255,
+        )
 
-test_datagen = ImageDataGenerator(
-    rescale=1./255
-)
+    train_generator = train_datagen.flow_from_directory(
+        directory=TRAIN_DIR,
+        target_size=(IMG_SIZE, IMG_SIZE),
+        class_mode='binary',
+        batch_size=BATCH_SIZE
+    )
 
-train_generator = train_datagen.flow_from_directory(
-    directory=DIR_TRAIN,
-    target_size=(IMG_SIZE, IMG_SIZE),
-    class_mode='binary',
-    batch_size=BATCH_SIZE
-)
+    # Validation data
+    valid_generator = ImageDataGenerator(
+        rescale=1. / 255
+    ).flow_from_directory(
+        directory=VALID_DIR,
+        target_size=(IMG_SIZE, IMG_SIZE),
+        class_mode='binary',
+        batch_size=BATCH_SIZE
+    )
 
-test_generator = test_datagen.flow_from_directory(
-    directory=DIR_TEST,
-    target_size=(IMG_SIZE, IMG_SIZE),
-    class_mode='binary',
-    batch_size=BATCH_SIZE
-)
+    # Test data
+    if os.path.exists(TEST_DIR):
+        test_generator = ImageDataGenerator(
+            rescale=1. / 255
+        ).flow_from_directory(
+            directory=TEST_DIR,
+            target_size=(IMG_SIZE, IMG_SIZE),
+            class_mode='binary',
+            batch_size=BATCH_SIZE
+        )
+    else:
+        test_generator = None
 
-valid_generator = valid_datagen.flow_from_directory(
-    directory=DIR_VALID,
-    target_size=(IMG_SIZE, IMG_SIZE),
-    class_mode='binary',
-    batch_size=BATCH_SIZE
-)
+    print("Labels:", train_generator.class_indices)
+    return train_generator, valid_generator, test_generator
 
-print(train_generator.class_indices)
 
-# Model structure
-model = Sequential()
-model.add(Conv2D(32, (2, 2), input_shape=INPUT_SHAPE))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+def compose_model(activation: str = 'relu', padding: str = 'valid'):
+    # Compose model structure
+    _model = Sequential()
 
-model.add(Conv2D(32, (2, 2)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+    _model.add(Conv2D(4, (3, 3), input_shape=INPUT_SHAPE, activation=activation, padding=padding))
+    _model.add(MaxPooling2D(pool_size=(2, 2), padding=padding))
 
-model.add(Conv2D(64, (2, 2)))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+    _model.add(Conv2D(8, (3, 3), activation=activation, padding=padding))
+    _model.add(MaxPooling2D(pool_size=(2, 2), padding=padding))
 
-model.add(Flatten())
-model.add(Dense(64))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(1))
-model.add(Activation('sigmoid'))
+    _model.add(Conv2D(16, (3, 3), activation=activation, padding=padding))
+    _model.add(MaxPooling2D(pool_size=(2, 2), padding=padding))
 
+    _model.add(Flatten())
+
+    _model.add(Dense(units=64, activation=activation))
+    _model.add(Dropout(0.75))
+
+    _model.add(Dense(units=1, activation='sigmoid'))
+
+    _model.summary()
+    return _model
+
+
+def lr_scheduler(epoch, lr):
+    if epoch < 10 or lr < 0.00005:
+        return lr
+    else:
+        return lr * math.exp(-0.1)
+
+
+def plot_graphs(_history):
+    # Plot training & validation accuracy values
+    plt.plot(_history.history['acc'])
+    plt.plot(_history.history['val_acc'])
+    plt.title(f'Model accuracy\nBATCH_SIZE = {BATCH_SIZE}, MULTIPLIER = {STEPS_MULTIPLIER}, LR = {LEARNING_RATE},\n'
+              f'TRAIN_SAMPLES = {train_data.samples}, VALIDATION_SAMPLES = {validation_data.samples}')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+
+    # Plot training & validation loss values
+    plt.plot(_history.history['loss'])
+    plt.plot(_history.history['val_loss'])
+    plt.title(f'Model loss\nBATCH_SIZE = {BATCH_SIZE}, MULTIPLIER = {STEPS_MULTIPLIER}, LR = {LEARNING_RATE},\n'
+              f'TRAIN_SAMPLES = {train_data.samples}, VALIDATION_SAMPLES = {validation_data.samples}')
+    plt.ylabel('Loss')
+    plt.xlabel('Epochs')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+
+
+# START ################################################################################################################
+
+# Load dataset from disk
+train_data, validation_data, test_data = load_dataset()
+
+# Create and compile the model
+model = compose_model(padding='same')
+optimizer = Adam(lr=LEARNING_RATE)
 model.compile(loss='binary_crossentropy',
-              optimizer='adam',
+              optimizer=optimizer,
               metrics=['accuracy'])
 
-# needs pydot, graphviz
-# plot_model(model, to_file='cnn_model.png', show_shapes=True, show_layer_names=True)
+# Save png representation of the model
+plot_model(model, to_file='cnn_model.png', show_shapes=True)
 
+# Setup callbacks to call
+callbacks = [
+    # EarlyStopping(monitor='val_loss', patience=5, verbose=1),
+    LearningRateScheduler(schedule=lr_scheduler, verbose=1)
+]
+
+# Train the model
 start = datetime.datetime.now()
-model.fit_generator(
-    generator=train_generator,
+history = model.fit_generator(
+    generator=train_data,
     epochs=EPOCHS,
-    validation_data=valid_generator
+    steps_per_epoch=(train_data.samples / BATCH_SIZE) * STEPS_MULTIPLIER,
+    validation_data=validation_data,
+    validation_steps=(validation_data.samples / BATCH_SIZE) * STEPS_MULTIPLIER,
+    verbose=2,
+    callbacks=callbacks
 )
-
 end = datetime.datetime.now()
-print('\nTime elapsed:', end-start)
+print('\nTime elapsed:', end - start)
 
-test_loss = model.evaluate_generator(
-    generator=test_generator
-)
+# Evaluate the model
+if test_data is not None:
+    test_loss = model.evaluate_generator(generator=test_data)
+    print(f"{model.metrics_names[0]}: {test_loss[0]}")
+    print(f"{model.metrics_names[1]}: {test_loss[1]}")
 
-print(f"{model.metrics_names[0]}: {test_loss[0]}")
-print(f"{model.metrics_names[1]}: {test_loss[1]}")
+# Plot accuracy and loss graphs
+plot_graphs(history)
