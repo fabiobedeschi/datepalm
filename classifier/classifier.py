@@ -1,6 +1,7 @@
+import datetime
 import math
 import os
-import datetime
+
 import matplotlib.pyplot as plt
 
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
@@ -8,7 +9,7 @@ from keras import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import EarlyStopping, LearningRateScheduler
+from keras.callbacks import LearningRateScheduler
 from keras.utils.vis_utils import plot_model
 
 # Parameters
@@ -17,7 +18,6 @@ CHANNELS = 3
 INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, CHANNELS)
 DATA_DIR = '../dataset'
 TRAIN_DIR = f'{DATA_DIR}/train'
-# VALID_DIR = f'{DATA_DIR}/validation'
 TEST_DIR = f'{DATA_DIR}/test'
 EPOCHS = 100
 BATCH_SIZE = 32
@@ -26,7 +26,6 @@ STEPS_MULTIPLIER = 1
 
 
 def load_dataset(augment: bool = False):
-    # Train data
     if augment:
         train_datagen = ImageDataGenerator(
             rescale=1. / 255,
@@ -41,6 +40,7 @@ def load_dataset(augment: bool = False):
             validation_split=0.2
         )
 
+    # Train data
     train_generator = train_datagen.flow_from_directory(
         directory=TRAIN_DIR,
         target_size=(IMG_SIZE, IMG_SIZE),
