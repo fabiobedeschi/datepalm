@@ -17,7 +17,7 @@ CHANNELS = 3
 INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, CHANNELS)
 DATA_DIR = '../dataset'
 TRAIN_DIR = f'{DATA_DIR}/train'
-VALID_DIR = f'{DATA_DIR}/validation'
+# VALID_DIR = f'{DATA_DIR}/validation'
 TEST_DIR = f'{DATA_DIR}/test'
 EPOCHS = 100
 BATCH_SIZE = 32
@@ -32,28 +32,30 @@ def load_dataset(augment: bool = False):
             rescale=1. / 255,
             horizontal_flip=True,
             vertical_flip=True,
-            rotation_range=90
+            rotation_range=90,
+            validation_split=0.2
         )
     else:
         train_datagen = ImageDataGenerator(
             rescale=1. / 255,
+            validation_split=0.2
         )
 
     train_generator = train_datagen.flow_from_directory(
         directory=TRAIN_DIR,
         target_size=(IMG_SIZE, IMG_SIZE),
         class_mode='binary',
-        batch_size=BATCH_SIZE
+        batch_size=BATCH_SIZE,
+        subset='training'
     )
 
     # Validation data
-    valid_generator = ImageDataGenerator(
-        rescale=1. / 255
-    ).flow_from_directory(
-        directory=VALID_DIR,
+    valid_generator = train_datagen.flow_from_directory(
+        directory=TRAIN_DIR,
         target_size=(IMG_SIZE, IMG_SIZE),
         class_mode='binary',
-        batch_size=BATCH_SIZE
+        batch_size=BATCH_SIZE,
+        subset='validation'
     )
 
     # Test data
