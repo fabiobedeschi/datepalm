@@ -15,10 +15,10 @@ from src.classifier.plotter import plot_graphs
 # START ################################################################################################################
 
 # Load dataset from disk
-train_data, validation_data, test_data = load_dataset(train_dir=TRAIN_DIR, test_dir=TEST_DIR)
+train_data, validation_data, test_data = load_dataset(augment=True, train_dir=TRAIN_DIR, test_dir=TEST_DIR)
 
 # Create the model
-model = compose_model(padding='valid')
+model = compose_model(padding='same')
 
 # Compile the model
 optimizer = Adam(lr=LEARNING_RATE)

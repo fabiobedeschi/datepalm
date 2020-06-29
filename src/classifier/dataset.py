@@ -7,9 +7,9 @@ def load_dataset(train_dir: str, test_dir: str, batch_size=BATCH_SIZE, img_size=
     if augment:
         train_datagen = ImageDataGenerator(
             rescale=1. / 255,
-            horizontal_flip=True,
-            vertical_flip=True,
-            rotation_range=90,
+            height_shift_range=0.2,
+            width_shift_range=0.2,
+            fill_mode='constant',
             validation_split=val_split
         )
     else:
