@@ -3,7 +3,7 @@ import os
 
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
 from keras.optimizers import Adam
-from keras.callbacks import LearningRateScheduler
+from keras.callbacks import LearningRateScheduler, TensorBoard
 from keras.utils.vis_utils import plot_model
 
 from src.config import TRAIN_DIR, TEST_DIR, LEARNING_RATE, EPOCHS, BATCH_SIZE, STEPS_MULTIPLIER
@@ -30,6 +30,7 @@ plot_model(model, to_file='cnn_model.png', show_shapes=True)
 # Setup callbacks to call
 callbacks = [
     # EarlyStopping(monitor='val_loss', patience=5, verbose=1),
+    TensorBoard(batch_size=BATCH_SIZE, update_freq='batch'),
     LearningRateScheduler(schedule=lr_scheduler, verbose=1)
 ]
 
