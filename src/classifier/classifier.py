@@ -30,7 +30,7 @@ plot_model(model, to_file='cnn_model.png', show_shapes=True)
 # Setup callbacks to call
 callbacks = [
     # EarlyStopping(monitor='val_loss', patience=5, verbose=1),
-    TensorBoard(log_dir=f'./logs/{datetime.now().isoformat()[16]}', batch_size=BATCH_SIZE, update_freq='batch'),
+    TensorBoard(log_dir=f'./logs/{datetime.now().isoformat()[:16]}', batch_size=BATCH_SIZE, update_freq='epoch'),
     LearningRateScheduler(schedule=lr_scheduler, verbose=1)
 ]
 

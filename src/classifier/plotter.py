@@ -4,7 +4,7 @@ from src.config import BATCH_SIZE, STEPS_MULTIPLIER, LEARNING_RATE
 
 
 def plot_graphs(history, train_samples, validation_samples, test_acc, test_loss):
-    title_infos = f'BATCH_SIZE = {BATCH_SIZE}, MULTIPLIER = {STEPS_MULTIPLIER}, LR = {LEARNING_RATE},\n' \
+    title_infos = f'BATCH_SIZE = {BATCH_SIZE}, MULTIPLIER = {STEPS_MULTIPLIER}, INITIAL_LR = {LEARNING_RATE},\n' \
                   f'TRAIN_SAMPLES = {train_samples}, VALIDATION_SAMPLES = {validation_samples},\n' \
                   f'test_acc = {round(test_acc, 2)}, test_loss = {round(test_loss, 2)}'
 

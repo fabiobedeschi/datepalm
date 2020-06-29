@@ -1,12 +1,12 @@
 import math
 
 from keras import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, LeakyReLU, Activation, BatchNormalization
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, LeakyReLU
 
 from src.config import INPUT_SHAPE, EPOCHS
 
 
-def compose_model(input_shape=INPUT_SHAPE, padding: str = 'valid'):
+def compose_model(input_shape=INPUT_SHAPE, padding: str = 'same'):
     # Compose model structure
     model = Sequential()
 
