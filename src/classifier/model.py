@@ -47,4 +47,4 @@ def lr_scheduler(epoch, lr):
     if epoch < (EPOCHS*0.2) or lr < 1e-06:
         return lr
     else:
-        return lr * math.exp(-0.1)
+        return lr * math.exp(-0.05)

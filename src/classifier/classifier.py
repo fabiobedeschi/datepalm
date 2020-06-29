@@ -1,5 +1,5 @@
-import datetime
 import os
+from datetime import datetime
 
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
 from keras.optimizers import Adam
@@ -30,12 +30,12 @@ plot_model(model, to_file='cnn_model.png', show_shapes=True)
 # Setup callbacks to call
 callbacks = [
     # EarlyStopping(monitor='val_loss', patience=5, verbose=1),
-    TensorBoard(batch_size=BATCH_SIZE, update_freq='batch'),
+    TensorBoard(log_dir=f'./logs/{datetime.now().isoformat()[16]}', batch_size=BATCH_SIZE, update_freq='batch'),
     LearningRateScheduler(schedule=lr_scheduler, verbose=1)
 ]
 
 # Train the model
-start = datetime.datetime.now()
+start = datetime.now()
 history = model.fit_generator(
     generator=train_data,
     epochs=EPOCHS,
@@ -45,7 +45,7 @@ history = model.fit_generator(
     verbose=2,
     callbacks=callbacks
 )
-end = datetime.datetime.now()
+end = datetime.now()
 print('\nTime elapsed:', end - start)
 
 # Evaluate the model
