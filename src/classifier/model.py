@@ -3,7 +3,8 @@ import math
 from keras import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, LeakyReLU
 
-from src.config import INPUT_SHAPE, EPOCHS
+from src.config import INPUT_SHAPE
+from src.classifier.params import EPOCHS
 
 
 def compose_model(input_shape=INPUT_SHAPE, padding: str = 'same'):

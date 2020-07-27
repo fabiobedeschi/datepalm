@@ -4,10 +4,7 @@ CHANNELS = 3
 INPUT_SHAPE = (IMG_SIZE, IMG_SIZE, CHANNELS)
 
 DATA_DIR = '../../dataset'
-TRAIN_DIR = f'{DATA_DIR}/train'
-TEST_DIR = f'{DATA_DIR}/test'
-
-EPOCHS = 100
-BATCH_SIZE = 20
-LEARNING_RATE = 0.001
-STEPS_MULTIPLIER = 1
+CNN_TRAIN_DIR = f'{DATA_DIR}/classifier/train'
+CNN_TEST_DIR = f'{DATA_DIR}/classifier/test'
+AED_TRAIN_DIR = f'{DATA_DIR}/autoencoder/train'
+AED_TEST_DIR = f'{DATA_DIR}/autoencoder/test'

@@ -1,10 +1,10 @@
 from keras_preprocessing.image import ImageDataGenerator
 
 from src.config import IMG_SIZE
-from src.classifier.params import BATCH_SIZE
+from src.autoencoder.params import BATCH_SIZE
 
 
-def load_dataset(train_dir: str, test_dir: str, batch_size=BATCH_SIZE, img_size=IMG_SIZE, augment=False, val_split=0.2):
+def load_dataset(train_dir: str, batch_size=BATCH_SIZE, img_size=IMG_SIZE, augment=False, val_split=0.2):
     if augment:
         train_datagen = ImageDataGenerator(
             rescale=1. / 255,
@@ -23,7 +23,7 @@ def load_dataset(train_dir: str, test_dir: str, batch_size=BATCH_SIZE, img_size=
     train_generator = train_datagen.flow_from_directory(
         directory=train_dir,
         target_size=(img_size, img_size),
-        class_mode='binary',
+        class_mode='input',
         batch_size=batch_size,
         subset='training'
     )
@@ -32,20 +32,9 @@ def load_dataset(train_dir: str, test_dir: str, batch_size=BATCH_SIZE, img_size=
     valid_generator = train_datagen.flow_from_directory(
         directory=train_dir,
         target_size=(img_size, img_size),
-        class_mode='binary',
+        class_mode='input',
         batch_size=batch_size,
         subset='validation'
     )
 
-    # Test data
-    test_generator = ImageDataGenerator(
-        rescale=1. / 255
-    ).flow_from_directory(
-        directory=test_dir,
-        target_size=(img_size, img_size),
-        class_mode='binary',
-        batch_size=batch_size
-    )
-
-    print("Labels:", train_generator.class_indices)
-    return train_generator, valid_generator, test_generator
+    return train_generator, valid_generator

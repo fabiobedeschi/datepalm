@@ -1,53 +1,34 @@
 import math
 
-from keras import Sequential
-from keras.layers import Conv2D, MaxPooling2D, LeakyReLU, UpSampling2D
+from keras import Model
+from keras.layers import Conv2D, MaxPooling2D, LeakyReLU, UpSampling2D, Input
 
-from src.config import INPUT_SHAPE, EPOCHS
+from src.autoencoder.params import EPOCHS
+from src.config import INPUT_SHAPE
 
 
-def compose_model(input_shape=INPUT_SHAPE, padding: str = 'same'):
+def compose_model(filters: list, input_shape: tuple = INPUT_SHAPE, padding: str = 'same'):
     # Compose model structure
-    model = Sequential()
+    input_layer = Input(shape=input_shape)
 
     # Encoder
-    model.add(Conv2D(8, (3, 3), input_shape=input_shape, padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(8, (3, 3), padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(16, (3, 3), padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(32, (3, 3), padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(32, (3, 3), padding=padding))
-    model.add(LeakyReLU())
+    encoder = input_layer
+    for f in filters:
+        encoder = (Conv2D(f, (3, 3), padding=padding))(encoder)
+        encoder = (LeakyReLU())(encoder)
+        encoder = (MaxPooling2D(pool_size=(2, 2)))(encoder)
 
     # Decoder
-    model.add(Conv2D(32, (3, 3), padding=padding))
-    model.add(LeakyReLU())
+    decoder = encoder
+    for f in filters[::-1]:
+        decoder = (UpSampling2D(size=(2, 2)))(decoder)
+        decoder = (Conv2D(f, (3, 3), padding=padding))(decoder)
+        decoder = (LeakyReLU())(decoder)
 
-    model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(32, (3, 3), padding=padding))
-    model.add(LeakyReLU())
+    output_layer = (Conv2D(3, (3, 3), padding=padding, activation='sigmoid'))(decoder)
 
-    model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(16, (3, 3), padding=padding))
-    model.add(LeakyReLU())
-
-    model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(8, (3, 3), padding=padding))
-    model.add(LeakyReLU())
-
-    model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(3, (3, 3), padding=padding, activation='sigmoid'))
+    # Create the model
+    model = Model(input_layer, output_layer)
 
     # Print and return model
     model.summary()
@@ -55,7 +36,4 @@ def compose_model(input_shape=INPUT_SHAPE, padding: str = 'same'):
 
 
 def lr_scheduler(epoch, lr):
-    if epoch < (EPOCHS*0.2) or lr < 1e-06:
-        return lr
-    else:
-        return lr * math.exp(-0.05)
+    return lr if epoch < (EPOCHS * 0.2) or lr < 1e-06 else lr * math.exp(-0.05)

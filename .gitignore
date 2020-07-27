@@ -1,6 +1,8 @@
 # Project stuff
 dataset*/
 logs/
+models/
+plots/
 *.png
 
 # Byte-compiled / optimized / DLL files

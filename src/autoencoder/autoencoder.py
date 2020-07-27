@@ -2,29 +2,29 @@ import os
 from datetime import datetime
 
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
-from keras.optimizers import Adam
 from keras.callbacks import LearningRateScheduler, TensorBoard
 from keras.utils.vis_utils import plot_model
+from keras.optimizers import RMSprop
 
-from src.config import CNN_TRAIN_DIR, CNN_TEST_DIR
+from src.config import AED_TRAIN_DIR
 from src.plotter import plot_graphs
 
-from src.classifier.params import *
-from src.classifier.dataset import load_dataset
-from src.classifier.model import compose_model, lr_scheduler
+from src.autoencoder.params import *
+from src.autoencoder.dataset import load_dataset
+from src.autoencoder.model import compose_model, lr_scheduler
 
 # START ################################################################################################################
 session_id = datetime.now().isoformat()[:16]
 
 # Load dataset from disk
-train_data, validation_data, test_data = load_dataset(augment=True, train_dir=CNN_TRAIN_DIR, test_dir=CNN_TEST_DIR)
+train_data, validation_data = load_dataset(train_dir=AED_TRAIN_DIR)
 
 # Create the model
-model = compose_model()
+model = compose_model(filters=[8, 16, 32, 64, 128])
 
 # Compile the model
-loss_func = 'binary_crossentropy'
-optimizer = Adam(lr=LEARNING_RATE)
+loss_func = 'mse'
+optimizer = RMSprop(lr=LEARNING_RATE)
 model.compile(loss=loss_func, optimizer=optimizer, metrics=['accuracy'])
 
 # Save png representation
@@ -53,11 +53,6 @@ print('\nTime elapsed:', end - start)
 
 # Save the model
 model.save(f'./models/{session_id}.h5')
-
-# Evaluate the model
-test_loss = model.evaluate_generator(generator=test_data)
-print(f"{model.metrics_names[0]}: {test_loss[0]}")
-print(f"{model.metrics_names[1]}: {test_loss[1]}")
 
 # Plot accuracy and loss graphs
 plot_graphs(history=history,
