@@ -8,7 +8,7 @@ from src.config import INPUT_SHAPE
 
 
 def compose_model(filters: list, input_shape: tuple = INPUT_SHAPE, padding: str = 'same'):
-    # Compose model structure
+    # Input layer
     input_layer = Input(shape=input_shape)
 
     # Encoder
@@ -21,10 +21,11 @@ def compose_model(filters: list, input_shape: tuple = INPUT_SHAPE, padding: str 
     # Decoder
     decoder = encoder
     for f in filters[::-1]:
-        decoder = (UpSampling2D(size=(2, 2)))(decoder)
         decoder = (Conv2D(f, (3, 3), padding=padding))(decoder)
         decoder = (LeakyReLU())(decoder)
+        decoder = (UpSampling2D(size=(2, 2)))(decoder)
 
+    # Output layer
     output_layer = (Conv2D(3, (3, 3), padding=padding, activation='sigmoid'))(decoder)
 
     # Create the model
@@ -36,4 +37,4 @@ def compose_model(filters: list, input_shape: tuple = INPUT_SHAPE, padding: str 
 
 
 def lr_scheduler(epoch, lr):
-    return lr if epoch < (EPOCHS * 0.2) or lr < 1e-06 else lr * math.exp(-0.05)
+    return lr if epoch < (EPOCHS * 0.1) or lr < 1e-09 else lr * math.exp(-0.05)

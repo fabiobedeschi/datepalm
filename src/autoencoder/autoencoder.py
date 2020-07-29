@@ -4,7 +4,7 @@ from datetime import datetime
 os.environ['KERAS_BACKEND'] = 'plaidml.keras.backend'
 from keras.callbacks import LearningRateScheduler, TensorBoard
 from keras.utils.vis_utils import plot_model
-from keras.optimizers import RMSprop
+from keras.optimizers import Adam
 
 from src.config import AED_TRAIN_DIR
 from src.plotter import plot_graphs
@@ -17,14 +17,14 @@ from src.autoencoder.model import compose_model, lr_scheduler
 session_id = datetime.now().isoformat()[:16]
 
 # Load dataset from disk
-train_data, validation_data = load_dataset(train_dir=AED_TRAIN_DIR)
+train_data, validation_data = load_dataset(train_dir=AED_TRAIN_DIR, val_split=0.1)
 
 # Create the model
 model = compose_model(filters=[8, 16, 32, 64, 128])
 
 # Compile the model
 loss_func = 'mse'
-optimizer = RMSprop(lr=LEARNING_RATE)
+optimizer = Adam(lr=LEARNING_RATE)
 model.compile(loss=loss_func, optimizer=optimizer, metrics=['accuracy'])
 
 # Save png representation
