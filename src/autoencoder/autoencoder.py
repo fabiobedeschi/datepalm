@@ -10,14 +10,14 @@ from src.config import AED_TRAIN_DIR
 from src.plotter import plot_graphs
 
 from src.autoencoder.params import *
-from src.autoencoder.dataset import load_dataset
+from src.autoencoder.dataset import load_train_dataset
 from src.autoencoder.model import compose_model, lr_scheduler
 
 # START ################################################################################################################
 session_id = datetime.now().isoformat()[:16]
 
 # Load dataset from disk
-train_data, validation_data = load_dataset(train_dir=AED_TRAIN_DIR, val_split=0.1)
+train_data, validation_data = load_train_dataset(train_dir=AED_TRAIN_DIR, val_split=0.1)
 
 # Create the model
 model = compose_model(filters=[8, 16, 32, 64, 128])

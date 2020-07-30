@@ -4,7 +4,7 @@ from src.config import IMG_SIZE
 from src.autoencoder.params import BATCH_SIZE
 
 
-def load_dataset(train_dir: str, batch_size=BATCH_SIZE, img_size=IMG_SIZE, augment=False, val_split=0.2):
+def load_train_dataset(train_dir: str, batch_size=BATCH_SIZE, img_size=IMG_SIZE, augment=False, val_split=0.2):
     if augment:
         train_datagen = ImageDataGenerator(
             rescale=1. / 255,
@@ -38,3 +38,16 @@ def load_dataset(train_dir: str, batch_size=BATCH_SIZE, img_size=IMG_SIZE, augme
     )
 
     return train_generator, valid_generator
+
+
+def load_test_dataset(test_dir: str, batch_size=BATCH_SIZE, img_size=IMG_SIZE):
+    test_generator = ImageDataGenerator(
+        rescale=1. / 255
+    ).flow_from_directory(
+        directory=test_dir,
+        target_size=(img_size, img_size),
+        class_mode='input',
+        batch_size=batch_size
+    )
+
+    return test_generator
