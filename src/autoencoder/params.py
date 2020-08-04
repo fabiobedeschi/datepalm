@@ -1,5 +1,5 @@
 # Autoencoder parameters
 EPOCHS = 100
-BATCH_SIZE = 8
+BATCH_SIZE = 5
 LEARNING_RATE = 0.001
 STEPS_MULTIPLIER = 1

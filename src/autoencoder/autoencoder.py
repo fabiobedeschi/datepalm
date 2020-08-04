@@ -20,7 +20,7 @@ session_id = datetime.now().isoformat()[:16]
 train_data, validation_data = load_train_dataset(train_dir=AED_TRAIN_DIR, val_split=0.1)
 
 # Create the model
-model = compose_model(filters=[8, 16, 32, 64, 128])
+model = compose_model(filters=[8, 16, 32, 64])
 
 # Compile the model
 loss_func = 'mse'
