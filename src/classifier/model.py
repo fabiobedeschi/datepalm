@@ -11,23 +11,23 @@ def compose_model(input_shape=INPUT_SHAPE, padding: str = 'same'):
     # Compose model structure
     model = Sequential()
 
-    model.add(Conv2D(8, (3, 3), input_shape=input_shape, padding=padding))
+    model.add(Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), input_shape=input_shape, padding=padding))
     model.add(LeakyReLU())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(8, (3, 3), padding=padding))
+    model.add(Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), padding=padding))
     model.add(LeakyReLU())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(16, (3, 3), padding=padding))
+    model.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(1, 1), padding=padding))
     model.add(LeakyReLU())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(32, (3, 3), padding=padding))
+    model.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding=padding))
     model.add(LeakyReLU())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(32, (3, 3), padding=padding))
+    model.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding=padding))
     model.add(LeakyReLU())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -45,7 +45,5 @@ def compose_model(input_shape=INPUT_SHAPE, padding: str = 'same'):
 
 
 def lr_scheduler(epoch, lr):
-    if epoch < (EPOCHS*0.2) or lr < 1e-06:
-        return lr
-    else:
-        return lr * math.exp(-0.05)
+    return lr if epoch < (EPOCHS * 0.2) or lr < 1e-09 else lr * math.exp(-0.05)
+

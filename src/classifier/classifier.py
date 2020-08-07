@@ -42,9 +42,9 @@ start = datetime.now()
 history = model.fit_generator(
     generator=train_data,
     epochs=EPOCHS,
-    steps_per_epoch=(train_data.samples / BATCH_SIZE) * STEPS_MULTIPLIER,
+    steps_per_epoch=len(train_data) * STEPS_MULTIPLIER,
     validation_data=validation_data,
-    validation_steps=(validation_data.samples / BATCH_SIZE) * STEPS_MULTIPLIER,
+    validation_steps=len(validation_data) * STEPS_MULTIPLIER,
     verbose=2,
     callbacks=callbacks
 )
@@ -55,7 +55,7 @@ print('\nTime elapsed:', end - start)
 model.save(f'./models/{session_id}.h5')
 
 # Evaluate the model
-test_loss = model.evaluate_generator(generator=test_data)
+test_loss = model.evaluate_generator(generator=test_data, steps=len(test_data))
 print(f"{model.metrics_names[0]}: {test_loss[0]}")
 print(f"{model.metrics_names[1]}: {test_loss[1]}")
 
