@@ -7,35 +7,27 @@ from src.config import INPUT_SHAPE
 from src.classifier.params import EPOCHS
 
 
-def compose_model(input_shape=INPUT_SHAPE, padding: str = 'same'):
+def compose_model(filters: list, input_shape=INPUT_SHAPE, padding: str = 'same'):
     # Compose model structure
     model = Sequential()
 
-    model.add(Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), input_shape=input_shape, padding=padding))
+    model.add(Conv2D(filters=filters[0], kernel_size=(3, 3), strides=(1, 1), input_shape=input_shape, padding=padding))
     model.add(LeakyReLU())
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(filters=8, kernel_size=(3, 3), strides=(1, 1), padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(filters=16, kernel_size=(3, 3), strides=(1, 1), padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(filters=32, kernel_size=(3, 3), strides=(1, 1), padding=padding))
-    model.add(LeakyReLU())
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    for f in filters[1:]:
+        model.add(Conv2D(filters=f, kernel_size=(3, 3), strides=(1, 1), padding=padding))
+        model.add(LeakyReLU())
+        model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())
 
     model.add(Dense(units=64))
     model.add(LeakyReLU())
     model.add(Dropout(0.5))
+
+    model.add(Dense(units=32))
+    model.add(LeakyReLU())
 
     model.add(Dense(units=1, activation='sigmoid'))
 
