@@ -12,12 +12,13 @@ from src.plotter import plot_graphs
 from src.autoencoder.params import *
 from src.autoencoder.dataset import load_train_dataset
 from src.autoencoder.model import compose_model, lr_scheduler
+from src.autoencoder.prediction import prediction
 
 # START ################################################################################################################
 session_id = datetime.now().isoformat()[:16]
 
 # Load dataset from disk
-train_data, validation_data = load_train_dataset(train_dir=AED_TRAIN_DIR, val_split=0.2)
+train_data, validation_data = load_train_dataset(train_dir=AED_TRAIN_DIR, val_split=0.25)
 
 # Create the model
 model = compose_model(filters=[16, 20, 24, 28, 32])
@@ -55,8 +56,17 @@ print('\nTime elapsed:', end - start)
 model.save(f'./models/{session_id}.h5')
 
 # Plot accuracy and loss graphs
-plot_graphs(history=history,
-            batch_size=BATCH_SIZE,
-            train_samples=train_data.samples,
-            validation_samples=validation_data.samples,
-            session_id=session_id)
+plot_graphs(
+    history=history,
+    batch_size=BATCH_SIZE,
+    train_samples=train_data.samples,
+    validation_samples=validation_data.samples,
+    session_id=session_id
+)
+
+# Evaluate model
+print()
+prediction(
+    model=model,
+    model_code=session_id
+)

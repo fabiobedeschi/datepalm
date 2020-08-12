@@ -22,6 +22,9 @@ def compose_model(filters: list, input_shape: tuple = INPUT_SHAPE, padding: str 
         encoder = (LeakyReLU())(encoder)
         encoder = (MaxPooling2D(pool_size=(2, 2)))(encoder)
     encoder = Flatten()(encoder)
+    encoder = Dense(units=512)(encoder)
+    encoder = Dropout(0.25)(encoder)
+    encoder = LeakyReLU()(encoder)
 
     # Bottleneck
     encoder = Dense(units=256)(encoder)
@@ -29,8 +32,10 @@ def compose_model(filters: list, input_shape: tuple = INPUT_SHAPE, padding: str 
 
     # Decoder
     decoder = encoder
+    decoder = Dense(units=512)(decoder)
+    decoder = Dropout(0.25)(decoder)
+    decoder = LeakyReLU()(decoder)
     decoder = Dense(units=dim ** 2 * filters[-1])(decoder)
-    decoder = Dropout(0.1)(decoder)
     decoder = LeakyReLU()(decoder)
     decoder = Reshape((dim, dim, -1))(decoder)
     for f in filters[::-1]:

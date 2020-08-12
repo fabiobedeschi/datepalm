@@ -23,8 +23,8 @@ def compose_model(filters: list, input_shape=INPUT_SHAPE, padding: str = 'same')
     model.add(Flatten())
 
     model.add(Dense(units=64))
-    model.add(LeakyReLU())
     model.add(Dropout(0.5))
+    model.add(LeakyReLU())
 
     model.add(Dense(units=32))
     model.add(LeakyReLU())
