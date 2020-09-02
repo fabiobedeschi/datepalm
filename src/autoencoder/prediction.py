@@ -15,15 +15,6 @@ _model_code = '2020-08-12T14:28'
 _model = load_model(f'./models/{_model_code}.h5')
 
 
-def _do_the_trick(mse, classes, threshold):
-    idx = 0
-    for cls in classes:
-        if cls == 1:
-            mse[idx] = abs(mse[idx] + threshold / 2)
-        idx += 1
-    return mse
-
-
 def _mix_points(classes, mse):
     pairs = list(zip(classes, mse))
     shuffle(pairs)
@@ -31,17 +22,13 @@ def _mix_points(classes, mse):
 
 
 def prediction(model=_model, model_code=_model_code, threshold=_threshold):
-    generators = {'train': load_test_dataset(test_dir=AED_TRAIN_DIR), 'test': load_test_dataset(test_dir=AED_TEST_DIR)}
+    generators = {
+        'train': load_test_dataset(test_dir=AED_TRAIN_DIR),
+        'test': load_test_dataset(test_dir=AED_TEST_DIR)
+    }
 
     for gen_name, generator in generators.items():
         print(gen_name)
-
-        # evaluation = model.evaluate_generator(generator=generator, steps=len(generator))
-        # if not isinstance(evaluation, list):
-        #     evaluation = [evaluation]
-        #
-        # for i in range(len(model.metrics_names)):
-        #     print(f"{model.metrics_names[i]}: {evaluation[i]}")
 
         samples = np.concatenate([next(generator)[0] for _ in range(len(generator))])
         predictions = model.predict_generator(generator=generator, steps=len(generator))
@@ -62,14 +49,14 @@ def prediction(model=_model, model_code=_model_code, threshold=_threshold):
 
         se = np.power(np.subtract(predictions, samples), 2)
         mse = np.mean(se, axis=(1, 2, 3))
-        # mse = _do_the_trick(mse)
 
-        print('mse:', np.mean(mse))
+        print('total mse:', np.mean(mse))
         print('total under threshold:', (mse < threshold).sum(), '/', generator.samples)
         if gen_name == 'test':
             print('good under threshold:',
                   sum(cls == 0 and val < threshold for cls, val in zip(generator.classes, mse)),
-                  '/', sum(cls == 0 for cls in generator.classes))
+                  '/',
+                  sum(cls == 0 for cls in generator.classes))
 
         generator.classes, mse = _mix_points(generator.classes, mse)
 
@@ -82,5 +69,4 @@ def prediction(model=_model, model_code=_model_code, threshold=_threshold):
         print()
 
 
-# Independent run
 prediction()

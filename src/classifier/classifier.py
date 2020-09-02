@@ -55,9 +55,9 @@ print('\nTime elapsed:', end - start)
 model.save(f'./models/{session_id}.h5')
 
 # Evaluate the model
-test_loss = model.evaluate_generator(generator=test_data, steps=len(test_data))
-print(f"{model.metrics_names[0]}: {test_loss[0]}")
-print(f"{model.metrics_names[1]}: {test_loss[1]}")
+test = model.evaluate_generator(generator=test_data, steps=len(test_data))
+print(f"{model.metrics_names[0]}: {test[0]}")
+print(f"{model.metrics_names[1]}: {test[1]}")
 
 # Plot accuracy and loss graphs
 plot_graphs(

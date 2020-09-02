@@ -64,9 +64,3 @@ plot_graphs(
     session_id=session_id
 )
 
-# Evaluate model
-print()
-prediction(
-    model=model,
-    model_code=session_id
-)
